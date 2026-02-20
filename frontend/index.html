@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SourceForge Alpha</title>
+<style>
+body { background:#0B0F14; color:#E6E6E6; font-family:system-ui; padding:40px; }
+.card { background:#121922; padding:20px; border-radius:10px; max-width:600px; margin:auto; }
+button { padding:10px; background:#FF6A00; border:none; color:white; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="card">
+<h1>SourceForge Alpha</h1>
+<p id="status">Checking backend...</p>
+<button onclick="check()">Check API</button>
+</div>
+<script>
+async function check(){
+const res = await fetch('/api/health');
+const data = await res.json();
+document.getElementById('status').innerText = JSON.stringify(data);
+}
+check();
+</script>
+</body>
+</html>

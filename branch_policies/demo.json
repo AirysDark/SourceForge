@@ -1,0 +1,11 @@
+{
+  "protected_branches": {
+    "main": {
+      "required_status_checks": [
+        "build",
+        "tests"
+      ],
+      "required_reviews": 2
+    }
+  }
+}

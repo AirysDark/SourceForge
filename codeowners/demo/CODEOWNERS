@@ -1,0 +1,2 @@
+*.py @backend-team
+webui/* @frontend-team

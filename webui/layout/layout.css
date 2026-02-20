@@ -1,0 +1,4 @@
+.layout{display:flex;}
+.sidebar{width:220px;background:var(--sf-panel);padding:16px;}
+.content{flex:1;padding:20px;}
+.topbar{background:var(--sf-panel2);padding:12px 20px;border-bottom:1px solid var(--sf-border-soft);}

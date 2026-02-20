@@ -1,0 +1,19 @@
+{
+  "@backend-team": {
+    "members": [
+      "alice",
+      "bob",
+      "eve",
+      "frank",
+      "mike"
+    ],
+    "quorum": 2
+  },
+  "@frontend-team": {
+    "members": [
+      "carol",
+      "dave"
+    ],
+    "quorum": 1
+  }
+}

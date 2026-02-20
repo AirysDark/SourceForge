@@ -1,0 +1,18 @@
+:root{
+--sf-bg:#0B0F14;
+--sf-panel:#121922;
+--sf-panel2:#0F151D;
+--sf-border-soft:#1A2431;
+--sf-text:#E6E6E6;
+--sf-accent:#FF6A00;
+--sf-success:#2ecc71;
+--sf-danger:#FF4D4D;
+--sf-radius:10px;
+}
+body{margin:0;background:var(--sf-bg);color:var(--sf-text);font-family:system-ui;}
+.topbar{display:flex;justify-content:space-between;padding:12px 20px;
+background:var(--sf-panel2);border-bottom:1px solid var(--sf-border-soft);}
+.card{background:var(--sf-panel);border:1px solid var(--sf-border-soft);
+border-radius:var(--sf-radius);padding:16px;margin:20px;}
+.queue-item,.notification{padding:6px 0;border-bottom:1px solid var(--sf-border-soft);}
+.badge{background:var(--sf-accent);padding:3px 8px;border-radius:20px;font-size:12px;}

@@ -1,0 +1,18 @@
+{
+  "tree": {
+    "name": "",
+    "type": "dir",
+    "children": [
+      {
+        "name": "src",
+        "type": "dir",
+        "children": [
+          {"name": "main.js", "type": "file", "updated": "1d ago"},
+          {"name": "router.js", "type": "file", "updated": "2d ago"}
+        ]
+      },
+      {"name": "index.html", "type": "file", "updated": "3d ago"},
+      {"name": "theme.css", "type": "file", "updated": "4d ago"}
+    ]
+  }
+}

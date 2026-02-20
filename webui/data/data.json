@@ -1,0 +1,1 @@
+{"files": [{"name": "engine/crdt.js", "diff": [{"left": "- const old = null;", "right": "+ const crdt = new Engine();"}, {"left": "- return old;", "right": "+ return crdt;"}]}], "mergeQueue": [{"id": 12, "title": "Fix race condition"}, {"id": 14, "title": "Optimize pack writer"}], "notifications": [{"text": "PR #12 approved"}, {"text": "New comment on PR #14"}]}

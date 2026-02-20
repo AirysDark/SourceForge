@@ -1,0 +1,8 @@
+:root{
+--sf-bg:#0B0F14;--sf-panel:#121922;--sf-border-soft:#1A2431;
+--sf-text:#E6E6E6;--sf-radius:10px;}
+body{margin:0;background:var(--sf-bg);color:var(--sf-text);font-family:system-ui;}
+.card{background:var(--sf-panel);border:1px solid var(--sf-border-soft);
+border-radius:var(--sf-radius);padding:16px;margin:12px;}
+textarea{width:100%;margin-bottom:6px;}
+pre{background:#0F151D;padding:10px;border-radius:8px;}

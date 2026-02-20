@@ -1,0 +1,1 @@
+[{"id": 1, "title": "Add CRDT branch support", "status": "open", "author": "dev1", "reviews": {"approved": 1, "required": 2}, "ci": "passing"}, {"id": 2, "title": "Fix merge queue bug", "status": "merged", "author": "dev2", "reviews": {"approved": 2, "required": 2}, "ci": "passing"}]
