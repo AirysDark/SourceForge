@@ -10,13 +10,20 @@ services:
       - db_data:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     restart: always
     depends_on:
       - db
+    expose:
+      - "8000"
 
   nginx:
-    build: ./nginx
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    restart: always
     ports:
       - "80:80"
     depends_on:
