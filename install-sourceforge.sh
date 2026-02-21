@@ -1,92 +1,97 @@
 #!/bin/bash
-
 set -e
 
-echo "=== SourceForge Alpha Installer ==="
+REPO="AirysDark/SourceForge"
+DEFAULT_INSTALL="/opt/sourceforge"
+
+echo "========================================="
+echo " SourceForge Installer (Auto Version)"
+echo "========================================="
 
 # Detect architecture
 ARCH=$(uname -m)
 echo "Detected architecture: $ARCH"
 
-if [[ "$ARCH" == "armv7l" ]]; then
-    PLATFORM="ARMv7 (Raspberry Pi 3)"
-elif [[ "$ARCH" == "aarch64" ]]; then
-    PLATFORM="ARM64"
-elif [[ "$ARCH" == "x86_64" ]]; then
-    PLATFORM="x86_64"
-else
-    echo "Unsupported architecture: $ARCH"
-    exit 1
-fi
+# Ensure required tools exist
+install_if_missing() {
+  if ! command -v $1 >/dev/null 2>&1; then
+    echo "$1 not found. Installing..."
+    sudo apt update
+    sudo apt install -y $2
+  fi
+}
 
-echo "Platform: $PLATFORM"
+install_if_missing curl curl
+install_if_missing unzip unzip
+install_if_missing openssl openssl
 
 # Check Docker
-if ! command -v docker &> /dev/null; then
-    echo "Docker not found. Installing..."
-    sudo apt update
-    sudo apt install docker.io docker-compose -y
-    sudo systemctl enable docker
-    sudo systemctl start docker
-    sudo usermod -aG docker $USER
-    echo "Docker installed. Please log out and back in, then re-run installer."
-    exit 0
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Docker not found. Installing..."
+  sudo apt update
+  sudo apt install docker.io docker-compose -y
+  sudo systemctl enable docker || true
+  sudo systemctl start docker || true
+  sudo usermod -aG docker $USER
+  echo "Docker installed. Please log out and back in, then re-run."
+  exit 0
 fi
 
 echo "Docker detected."
 
-# Ask install location
-read -p "Install directory [/opt/sourceforge]: " INSTALL_DIR
-INSTALL_DIR=${INSTALL_DIR:-/opt/sourceforge}
+# Install location
+read -p "Install directory [$DEFAULT_INSTALL]: " INSTALL_DIR
+INSTALL_DIR=${INSTALL_DIR:-$DEFAULT_INSTALL}
 
-sudo mkdir -p $INSTALL_DIR
-sudo chown $USER:$USER $INSTALL_DIR
-cd $INSTALL_DIR
+sudo mkdir -p "$INSTALL_DIR"
+sudo chown $USER:$USER "$INSTALL_DIR"
+cd "$INSTALL_DIR"
 
-# Ask admin details
-read -p "Admin username: " ADMIN_USER
-read -s -p "Admin password: " ADMIN_PASS
-echo ""
+echo "Detecting latest release from GitHub..."
 
-# Generate JWT secret
-JWT_SECRET=$(openssl rand -hex 32)
-echo "Generated secure JWT secret."
+LATEST_JSON=$(curl -s https://api.github.com/repos/$REPO/releases/latest)
 
-# Download Alpha stack
-echo "Downloading SourceForge Alpha stack..."
-curl -L -o sourceforge-alpha.zip https://your-download-link/sourceforge-alpha-full-stack.zip
+DOWNLOAD_URL=$(echo "$LATEST_JSON" | grep browser_download_url | grep SourceForge.zip | cut -d '"' -f 4)
 
-unzip -o sourceforge-alpha.zip
-cd sourceforge-alpha-full-stack
+if [ -z "$DOWNLOAD_URL" ]; then
+  echo "Could not find SourceForge.zip in latest release."
+  exit 1
+fi
 
-# Create .env
-cat > .env <<EOF
+VERSION=$(echo "$LATEST_JSON" | grep tag_name | cut -d '"' -f 4)
+
+echo "Latest version detected: $VERSION"
+echo "Downloading from: $DOWNLOAD_URL"
+
+curl -L -o SourceForge.zip "$DOWNLOAD_URL"
+
+rm -rf SourceForge
+mkdir SourceForge
+
+echo "Extracting..."
+unzip -q SourceForge.zip -d SourceForge
+
+cd SourceForge
+
+if [ -f docker-compose.yml ]; then
+  echo "Creating .env..."
+  JWT_SECRET=$(openssl rand -hex 32)
+
+  cat > .env <<EOF
 DATABASE_URL=postgresql://sourceforge:sourceforge@db:5432/sourceforge
 SF_JWT_SECRET=$JWT_SECRET
 ENV=prod
 EOF
+fi
 
-echo "Environment configured."
-
-# Start containers
 echo "Starting containers..."
 docker compose up --build -d || docker-compose up --build -d
-
-sleep 5
-
-# Verify health
-if curl -s http://localhost/api/health | grep -q "ok"; then
-    echo "Backend healthy."
-else
-    echo "Backend failed to start."
-    exit 1
-fi
 
 IP=$(hostname -I | awk '{print $1}')
 
 echo ""
-echo "===================================="
-echo "SourceForge Alpha Installed!"
-echo "Access it at:"
-echo "http://$IP"
-echo "===================================="
+echo "========================================="
+echo " SourceForge $VERSION Installed"
+echo " Open in browser:"
+echo " http://$IP"
+echo "========================================="
