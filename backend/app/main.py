@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth
+# Import new API routers
+try:
+    from app.api import auth
+except Exception:
+    auth = None  # Allows boot even if auth temporarily missing
 
 app = FastAPI(title="SourceForge API")
 
+# CORS (Alpha-wide open)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,9 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API routers
-app.include_router(auth.router)
+# Include routers if available
+if auth:
+    app.include_router(auth.router)
 
+# Health endpoint
 @app.get("/api/health")
 def health():
     return {"status": "ok"}

@@ -10,17 +10,13 @@ services:
       - db_data:/var/lib/postgresql/data
 
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    build: ./backend
     restart: always
     depends_on:
       - db
 
   nginx:
-    build:
-      context: .
-      dockerfile: nginx/Dockerfile
+    build: ./nginx
     ports:
       - "80:80"
     depends_on:

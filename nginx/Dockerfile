@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
 
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY frontend/ /usr/share/nginx/html/
+FROM nginx:stable-alpine
+COPY default.conf /etc/nginx/conf.d/default.conf
+COPY ../frontend /usr/share/nginx/html
