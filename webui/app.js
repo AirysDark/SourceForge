@@ -1,6 +1,6 @@
 // webui/app.js
 
-import { registerRoute, initRouter, navigate, getRoute } from "./core/router.js";
+import { registerRoute, initRouter, navigate } from "./core/router.js";
 import { getToken } from "./api.js";
 import { renderAppShell } from "./layout/app-shell.js";
 
@@ -57,12 +57,12 @@ import "./components/virtual-repos.js";
 ================================ */
 
 function requireAuth(handler) {
-  return (root) => {
+  return (root, params) => {
     if (!getToken()) {
-      navigate("/login");
+      navigate("/login", true);
       return;
     }
-    renderAppShell(root, handler);
+    renderAppShell(root, (content) => handler(content, params));
   };
 }
 
@@ -70,22 +70,19 @@ function requireAuth(handler) {
    Dynamic Repo Route
 ================================ */
 
-function dynamicRepoRoute(root) {
-  const route = getRoute();
-  const parts = route.split("/");
-
-  if (parts.length === 2 && parts[0] === "repo") {
-    renderAppShell(root, (content) => {
-      repoPage(content, parts[1]);
-    });
+function dynamicRepoRoute(root, params) {
+  if (!params || !params.id) {
+    root.innerHTML = `
+      <div class="card">
+        <h2>Invalid Repo Route</h2>
+      </div>
+    `;
     return;
   }
 
-  root.innerHTML = `
-    <div class="card">
-      <h2>Invalid Repo Route</h2>
-    </div>
-  `;
+  renderAppShell(root, (content) => {
+    repoPage(content, params.id);
+  });
 }
 
 /* ===============================
@@ -96,13 +93,19 @@ function dynamicRepoRoute(root) {
 registerRoute("login", loginPage);
 registerRoute("register", registerPage);
 
-/* Default */
-registerRoute("", requireAuth(dashboardPage));
+/* Root redirect (SAFE) */
+registerRoute("", (root) => {
+  if (getToken()) {
+    navigate("/dashboard", true);
+  } else {
+    navigate("/login", true);
+  }
+});
 
 /* Protected */
 registerRoute("dashboard", requireAuth(dashboardPage));
 registerRoute("repos", requireAuth(reposPage));
-registerRoute("repo", requireAuth(dynamicRepoRoute));
+registerRoute("repo/:id", requireAuth(dynamicRepoRoute));
 registerRoute("admin", requireAuth(adminPage));
 registerRoute("prs", requireAuth(prListPage));
 registerRoute("profile", requireAuth(profilePage));
