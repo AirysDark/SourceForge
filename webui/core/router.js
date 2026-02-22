@@ -1,5 +1,7 @@
 // webui/core/router.js
 
+import { getToken } from "../api.js";
+
 const routes = [];
 
 /* ============================================
@@ -61,14 +63,14 @@ export function navigate(path, replace = false) {
 function matchRoute(route) {
   const routeParts = route.split("/");
 
-  // 1️⃣ Exact match first
+  // Exact match first
   for (const r of routes) {
     if (r.path === route) {
       return { handler: r.handler, params: {} };
     }
   }
 
-  // 2️⃣ Dynamic match
+  // Dynamic match
   for (const r of routes) {
     const pathParts = r.path.split("/");
 
@@ -119,15 +121,15 @@ function render() {
     return;
   }
 
-  // Default route
+  // ? Conditional Root Redirect
   if (!route) {
-    const defaultRoute = routes.find(r => r.path === "");
-    if (defaultRoute) {
-      root.innerHTML = "";
-      defaultRoute.handler(root, {});
-      rendering = false;
-      return;
+    if (getToken()) {
+      navigate("/dashboard", true);
+    } else {
+      navigate("/login", true);
     }
+    rendering = false;
+    return;
   }
 
   const match = matchRoute(route);
@@ -173,7 +175,6 @@ function render() {
 ============================================ */
 
 export function initRouter() {
-
   window.addEventListener("popstate", render);
 
   document.body.addEventListener("click", (e) => {
