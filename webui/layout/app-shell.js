@@ -1,48 +1,70 @@
-class SfApp extends HTMLElement{
+import { getToken, clearToken } from "../api.js";
+import { navigate, getRoute } from "../core/router.js";
 
-async connectedCallback(){
-const res=await fetch("webui/data/state.json");
-this.state=await res.json();
-this.connectWebSocket();
-this.render();
+export function renderAppShell(root, pageHandler) {
+
+  const currentRoute = getRoute();
+  const isAuth = !!getToken();
+
+  root.innerHTML = `
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="logo">SourceForge</div>
+
+        <nav>
+          <a href="/dashboard" data-link class="${active("dashboard", currentRoute)}">Dashboard</a>
+          <a href="/repos" data-link class="${active("repos", currentRoute)}">Repositories</a>
+          <a href="/prs" data-link class="${active("prs", currentRoute)}">Pull Requests</a>
+          <a href="/admin" data-link class="${active("admin", currentRoute)}">Admin</a>
+          <a href="/profile" data-link class="${active("profile", currentRoute)}">Profile</a>
+        </nav>
+      </aside>
+
+      <div class="main">
+        <div class="topbar">
+          <div>Alpha</div>
+
+          <div class="user">
+            ${isAuth ? `
+              <span>Authenticated</span>
+              <button id="logoutBtn" class="logout-btn">Logout</button>
+            ` : `
+              <span>Guest</span>
+            `}
+          </div>
+        </div>
+
+        <div class="content" id="pageContent"></div>
+      </div>
+    </div>
+  `;
+
+  // Logout handler
+  const logoutBtn = root.querySelector("#logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      clearToken();
+      navigate("login");
+    };
+  }
+
+  // Render page content safely
+  const content = root.querySelector("#pageContent");
+
+  try {
+    pageHandler(content);
+  } catch (err) {
+    console.error("Page render error:", err);
+    content.innerHTML = `
+      <div class="card">
+        <h2>Page Error</h2>
+        <p>Something went wrong rendering this page.</p>
+      </div>
+    `;
+  }
 }
 
-connectWebSocket(){
-this.ws=new WebSocket("ws://localhost:8765");
-this.ws.onmessage=(event)=>{
-const msg=JSON.parse(event.data);
-if(msg.type==="notification"){
-this.state.notifications.unshift({text:msg.text});
+/* Helper for active link highlighting */
+function active(name, current) {
+  return current.startsWith(name) ? "active" : "";
 }
-if(msg.type==="queue"){
-this.state.mergeQueue.unshift(msg.item);
-}
-this.render();
-};
-}
-
-render(){
-this.innerHTML=`
-<div class="topbar">
-<strong>SourceForge (Live)</strong>
-<span class="badge">${this.state.notifications.length}</span>
-</div>
-
-<div class="card">
-<h2>Merge Queue</h2>
-${this.state.mergeQueue.map(q=>`
-<div class="queue-item">#${q.id} — ${q.title}</div>
-`).join("")}
-</div>
-
-<div class="card">
-<h2>Notifications</h2>
-${this.state.notifications.map(n=>`
-<div class="notification">${n.text}</div>
-`).join("")}
-</div>
-`;
-}
-}
-
-customElements.define("sf-app",SfApp);

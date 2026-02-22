@@ -1,4 +1,7 @@
+version: "3.9"
+
 services:
+
   db:
     image: postgres:15
     restart: always
@@ -8,6 +11,17 @@ services:
       POSTGRES_DB: sourceforge
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sourceforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    restart: always
+    expose:
+      - "6379"
 
   backend:
     build:
@@ -15,7 +29,16 @@ services:
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      # 🔥 MUST match settings.py
+      SF_DATABASE_URL: postgresql://sourceforge:sourceforge@db:5432/sourceforge
+      SF_REDIS_URL: redis://redis:6379/0
+      SF_JWT_SECRET: ${SF_JWT_SECRET:-dev-secret-change}
+      SF_ENV: production
     expose:
       - "8000"
 
@@ -24,10 +47,10 @@ services:
       context: .
       dockerfile: nginx/Dockerfile
     restart: always
-    ports:
-      - "80:80"
     depends_on:
       - backend
+    ports:
+      - "80:80"
 
 volumes:
   db_data:
