@@ -121,8 +121,12 @@ function render() {
     return;
   }
 
-  // ? Conditional Root Redirect
-  if (!route) {
+// Default root handling
+if (!route) {
+  const hasDashboard = routes.find(r => r.path === "dashboard");
+  const hasLogin = routes.find(r => r.path === "login");
+
+  if (hasDashboard && hasLogin) {
     if (getToken()) {
       navigate("/dashboard", true);
     } else {
@@ -131,6 +135,7 @@ function render() {
     rendering = false;
     return;
   }
+}
 
   const match = matchRoute(route);
 
