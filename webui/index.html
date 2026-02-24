@@ -7,15 +7,15 @@
 
   <title>SourceForge</title>
 
-  <!-- Base path (important for SPA + nginx) -->
+  <!-- SPA base path -->
   <base href="/" />
 
   <!-- Prevent favicon 404 -->
   <link rel="icon" href="data:," />
 
-  <!-- Theme + Layout -->
-  <link rel="stylesheet" href="./theme.css" />
-  <link rel="stylesheet" href="./layout/layout.css" />
+  <!-- Theme + Layout (ABSOLUTE PATHS) -->
+  <link rel="stylesheet" href="/theme.css" />
+  <link rel="stylesheet" href="/layout/layout.css" />
 
   <style>
     html, body {
@@ -53,12 +53,12 @@
 
   <!-- SPA Entry -->
   <script type="module">
-    // Remove boot loader once JS loads
     const root = document.getElementById("app");
     root.innerHTML = "";
   </script>
 
-  <script type="module" src="./app.js"></script>
+  <!-- Main App (ABSOLUTE PATH) -->
+  <script type="module" src="/app.js"></script>
 
 </body>
 </html>
